@@ -980,4 +980,4 @@ catch {
 # 5. Удаляем файл
 Remove-Item $outputFile -Force -ErrorAction SilentlyContinue
 
-Write-Host "[+] Готово!" -ForegroundColor Green
+Write-Host "[+]done" -ForegroundColor Green
